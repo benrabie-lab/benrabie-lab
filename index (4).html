@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Billie Eilish</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;1,9..40,300&display=swap" rel="stylesheet"/>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { height:100%; overflow:hidden; }
+    body {
+      background: #080808;
+      color: #f0ebe0;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .45s ease;
+    }
+    .page.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ══════════════════════════════
+       HOME
+    ══════════════════════════════ */
+    #page-0 { background: #080808; }
+
+    /* Hero = fixed height, NOT flex:1 */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 45vh;          /* fixed, not flex:1 */
+      flex-shrink: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+      padding: 1.6rem 2.5rem;
+      border-bottom: 2px solid #c8f135;
+    }
+    .hero img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: top center; opacity: .65;
+    }
+    .hero-grad {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, #080808 0%, transparent 55%);
+    }
+    .hero-content { position: relative; z-index: 2; }
+    .hero-eyebrow {
+      font-size: .65rem; letter-spacing: .25em; text-transform: uppercase;
+      color: #c8f135; margin-bottom: .3rem;
+    }
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.8rem, 7vw, 6rem); line-height: .88;
+    }
+    .hero-title em { color: #c8f135; font-style: normal; }
+
+    /* Two columns — takes remaining space */
+    .home-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      padding: 1.2rem 2.5rem;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .box {
+      border: 1.5px solid #222; border-radius: 14px;
+      padding: 1.2rem;
+      transition: border-color .3s;
+      overflow-y: auto;
+      min-height: 0;
+    }
+    .box:hover { border-color: #c8f135; }
+    .box-label {
+      font-family: 'Bebas Neue', sans-serif; font-size: .62rem;
+      letter-spacing: .28em; text-transform: uppercase;
+      color: #c8f135; margin-bottom: .8rem;
+    }
+    .box-intro {
+      font-size: .82rem; line-height: 1.7; color: #bbb; font-weight: 300;
+    }
+    .som-list { list-style: none; }
+    .som-item {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .45rem .3rem; border-bottom: 1px solid #222;
+      cursor: pointer; border-radius: 5px;
+      transition: background .2s, padding-left .2s;
+    }
+    .som-item:last-child { border-bottom: none; }
+    .som-item:hover { background: #111; padding-left: .7rem; }
+    .som-num {
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem;
+      color: #c8f135; min-width: 1.4rem; line-height: 1;
+    }
+    .som-text {
+      font-size: .8rem; font-weight: 300; letter-spacing: .03em;
+      color: #aaa; transition: color .2s;
+    }
+    .som-item:hover .som-text { color: #f0ebe0; }
+
+    /* ══════════════════════════════
+       TOP NAV
+    ══════════════════════════════ */
+    .top-nav {
+      display: flex; align-items: center;
+      padding: 0 2rem; height: 48px; flex-shrink: 0;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(14px);
+      /* z-index handled via stacking: nav is in normal flow above bg */
+    }
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem; letter-spacing: .14em;
+      cursor: pointer; margin-right: 1.4rem;
+      white-space: nowrap; flex-shrink: 0;
+      transition: opacity .2s;
+    }
+    .nav-logo:hover { opacity: .55; }
+    .nav-divider { width:1px; height:18px; background:#555; margin-right:1.4rem; flex-shrink:0; }
+    .nav-links { display:flex; align-items:center; gap:.1rem; overflow-x:auto; scrollbar-width:none; }
+    .nav-links::-webkit-scrollbar { display:none; }
+    .nav-link {
+      display: flex; align-items: center; gap: .4rem;
+      padding: .28rem .75rem; border-radius: 6px;
+      cursor: pointer; white-space: nowrap;
+      border: 1px solid transparent;
+      transition: background .2s, border-color .2s;
+    }
+    .nav-link:hover { background: rgba(255,255,255,.08); }
+    .nav-link.current {
+      border-color: var(--accent);
+      background: rgba(255,255,255,.07);
+      pointer-events: none;
+    }
+    .nl-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: .78rem; color: var(--accent); opacity: .75;
+    }
+    .nav-link.current .nl-num { opacity: 1; }
+    .nl-name {
+      font-size: .71rem; font-weight: 300; letter-spacing: .04em;
+      color: #999; transition: color .2s;
+    }
+    .nav-link:hover .nl-name { color: var(--accent); }
+    .nav-link.current .nl-name { color: #f0ebe0; }
+
+    /* ══════════════════════════════
+       INNER PAGES
+       Key fix: use a wrapper grid instead of absolute bg
+    ══════════════════════════════ */
+    #page-1 { --accent: #7ecfed; }
+    #page-2 { --accent: #b48fe8; }
+    #page-3 { --accent: #4cd48a; }
+    #page-4 { --accent: #d4af6a; }
+    #page-5 { --accent: #e8a0b4; }
+
+    /* The page itself is the bg container */
+    .inner-page {
+      /* background image set inline on element */
+      background-size: cover;
+      background-position: center top;
+    }
+
+    /* Dark overlay sits on top of bg via pseudo-element */
+    .inner-page::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        var(--overlay-color),
+        linear-gradient(to top, rgba(0,0,0,.9) 0%, rgba(0,0,0,.25) 60%, rgba(0,0,0,.1) 100%);
+      pointer-events: none;
+    }
+
+    #page-1 { --overlay-color: rgba(13,31,45,.65); }
+    #page-2 { --overlay-color: rgba(13,0,18,.68); }
+    #page-3 { --overlay-color: rgba(0,26,13,.65); }
+    #page-4 { --overlay-color: rgba(26,18,0,.65); }
+    #page-5 { --overlay-color: rgba(26,13,18,.65); }
+
+    /* All content children sit above ::before overlay */
+    .inner-page > * { position: relative; z-index: 1; }
+
+    .page-hero {
+      padding: 1.8rem 2.5rem 1.2rem;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      flex-shrink: 0;
+    }
+    .page-num-badge {
+      font-family: 'Bebas Neue', sans-serif; font-size: .62rem;
+      letter-spacing: .3em; color: var(--accent); margin-bottom: .3rem;
+    }
+    .page-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem,4vw,3.5rem); line-height: .9;
+    }
+    .page-title em { color: var(--accent); font-style: normal; }
+
+    .page-body {
+      flex: 1; padding: 1.4rem 2.5rem;
+      overflow-y: auto; min-height: 0;
+    }
+    .page-body::-webkit-scrollbar { width: 4px; }
+    .page-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 2px; }
+
+    .chip {
+      display: inline-block;
+      background: var(--accent); color: #080808;
+      font-family: 'Bebas Neue', sans-serif; font-size: .58rem;
+      letter-spacing: .3em; padding: .2rem .8rem; border-radius: 3px; margin-bottom: 1rem;
+    }
+    .content-text {
+      font-size: .87rem; line-height: 1.8; color: rgba(240,235,224,.9);
+      font-weight: 300; max-width: 800px;
+    }
+    .content-text p { margin-bottom: .9rem; }
+    .content-text p:last-child { margin-bottom: 0; }
+    .content-text strong { color: var(--accent); font-weight: 600; }
+
+    .quote {
+      border-left: 3px solid var(--accent);
+      padding: .75rem 1.2rem;
+      margin: 1rem 0;
+      background: rgba(255,255,255,.05);
+      border-radius: 0 8px 8px 0;
+    }
+    .quote p {
+      font-style: italic; font-size: .84rem;
+      color: rgba(240,235,224,.75); margin: 0 !important;
+    }
+
+    /* ══ SPLIT LAYOUT for pages 2 & 4 ══ */
+    .split-page {
+      /* override background on the page div — no bg image on full page */
+      background-image: none !important;
+    }
+    .split-page::before { display: none; } /* no overlay pseudo on the page itself */
+
+    .split-layout {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* Left: dark panel with text */
+    .split-left {
+      width: 50%;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: rgba(0,0,0,.82);
+      backdrop-filter: blur(4px);
+      border-right: 1px solid rgba(255,255,255,.08);
+    }
+    .split-left .page-hero {
+      padding: 1.6rem 2rem 1.1rem;
+    }
+    .split-left .page-body {
+      padding: 1.2rem 2rem;
+    }
+
+    /* Right: photo fills fully, object-fit cover */
+    .split-right {
+      width: 50%;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .split-right img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center top;
+    }
+    /* subtle gradient on right edge so it doesn't look cut off */
+    .split-right::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(to right, rgba(0,0,0,.25) 0%, transparent 30%);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ HOME ══ -->
+  <div id="page-0" class="page active">
+    <div class="hero">
+      <img src="image1.jpg" alt="Billie Eilish" onerror="this.style.display='none'"/>
+      <div class="hero-grad"></div>
+      <div class="hero-content">
+        <div class="hero-eyebrow">The World Stops For</div>
+        <h1 class="hero-title">Billie<br/><em>Eilish</em></h1>
+      </div>
+    </div>
+    <div class="home-body">
+      <div class="box">
+        <div class="box-label">About this site</div>
+        <p class="box-intro">Born on December 18, 2001 in Los Angeles, Billie Eilish Pirate Baird O'Connell became one of the most defining voices of her generation. This site traces her journey — from a creative childhood in Highland Park, through the turbulence of teenage fame, to becoming a record-breaking global icon with 10 Grammys and 2 Oscars.</p>
+      </div>
+      <div class="box">
+        <div class="box-label">Sommaire</div>
+        <ul class="som-list">
+          <li class="som-item" onclick="goTo(1)"><span class="som-num">1</span><span class="som-text">Childhood &amp; Early Life</span></li>
+          <li class="som-item" onclick="goTo(2)"><span class="som-num">2</span><span class="som-text">Teenage Years &amp; Rise to Fame</span></li>
+          <li class="som-item" onclick="goTo(3)"><span class="som-num">3</span><span class="som-text">Life After Adolescence</span></li>
+          <li class="som-item" onclick="goTo(4)"><span class="som-num">4</span><span class="som-text">Achievements &amp; Success</span></li>
+          <li class="som-item" onclick="goTo(5)"><span class="som-num">5</span><span class="som-text">Conclusion</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 1 ══ -->
+  <div id="page-1" class="page inner-page" style="background-image:url('image2.jpg')">
+    <nav class="top-nav" id="nav-1"></nav>
+    <div class="page-hero">
+      <div class="page-num-badge">Section 01</div>
+      <h2 class="page-title">Childhood &amp;<br/><em>Early Life</em></h2>
+    </div>
+    <div class="page-body">
+      <div class="chip">Before the spotlight</div>
+      <div class="content-text">
+        <p>Billie Eilish Pirate Baird O'Connell was born on <strong>December 18, 2001</strong> in the Highland Park neighbourhood of Los Angeles. Her parents, <strong>Maggie Baird</strong> and <strong>Patrick O'Connell</strong>, were both actors and musicians, though far from wealthy. Her father worked twelve-hour days as a construction worker, while her mother taught acting and organised songwriting workshops at home.</p>
+        <p>The family home was a two-bedroom house bursting with creativity — walls covered in art, shelves full of books, and instruments in every corner including three pianos. <strong>Billie and her older brother Finneas</strong> were homeschooled by their parents, giving them the freedom to dive deep into music from a very young age.</p>
+        <p>She wrote her <strong>first song at age 11</strong> for her mother's songwriting class — inspired by The Walking Dead. She also trained at Revolution Dance Center, passionate about dance. But at 12, a <strong>serious hip injury</strong> ruptured her growth plate and ended her dancing career — the start of a long battle with her body and mind.</p>
+        <p>Music remained a refuge. In 2015, Finneas composed <strong>"Ocean Eyes"</strong> and gave it to Billie, then 13, to record. They uploaded it to SoundCloud "just for fun." Overnight, it went viral. The world had found Billie Eilish.</p>
+        <div class="quote"><p>"At dance, you wear really tiny clothes. I've never felt comfortable in really tiny clothes. That was the peak of my body dysmorphia. I couldn't look in the mirror at all."</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 2 — SPLIT ══ -->
+  <div id="page-2" class="page inner-page split-page">
+    <nav class="top-nav" id="nav-2"></nav>
+    <div class="split-layout">
+      <!-- LEFT: text -->
+      <div class="split-left">
+        <div class="page-hero">
+          <div class="page-num-badge">Section 02</div>
+          <h2 class="page-title">Teenage Years &amp;<br/><em>Rise to Fame</em></h2>
+        </div>
+        <div class="page-body">
+          <div class="chip">Rise &amp; inner battles</div>
+          <div class="content-text">
+            <p>After "Ocean Eyes" went viral, Billie was signed to <strong>Interscope Records</strong> at just 14. She released her debut EP <strong><em>Don't Smile at Me</em></strong> in August 2017, aged 15. Whispered vocals, dark production, deeply personal lyrics. Teens around the world felt seen.</p>
+            <p>But behind the rising fame, Billie was living through <strong>the hardest years of her life</strong>. Between 13 and 16, she battled clinical depression, severe body dysmorphia, anxiety, and a period of self-harm. The hip injury had sent her into a spiral she described as a "hole" she couldn't climb out of.</p>
+            <div class="quote"><p>"When anyone else thinks about Billie Eilish at 14, they think of all the good things. But all I can think of is how miserable I was. Thirteen to 16 was pretty rough."</p></div>
+            <p>She adopted <strong>baggy, oversized clothes</strong> as a way to hide — they became her signature style, later praised as resistance against the music industry's pressure on women.</p>
+            <p>In March 2019, aged <strong>17</strong>, Billie released <strong><em>When We All Fall Asleep, Where Do We Go?</em></strong> — recorded in Finneas's bedroom. It debuted at #1 on the Billboard 200. Yet even as the world celebrated, Billie admitted she did not think she would survive to see 17.</p>
+            <div class="quote"><p>"I don't want to be too dark but I genuinely didn't think I'd make it to 17."</p></div>
+          </div>
+        </div>
+      </div>
+      <!-- RIGHT: photo -->
+      <div class="split-right">
+        <img src="image3.jpg" alt="Billie Eilish teenage years" onerror="this.style.display='none'"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 3 ══ -->
+  <div id="page-3" class="page inner-page" style="background-image:url('image4.jpg')">
+    <nav class="top-nav" id="nav-3"></nav>
+    <div class="page-hero">
+      <div class="page-num-badge">Section 03</div>
+      <h2 class="page-title">Life After<br/><em>Adolescence</em></h2>
+    </div>
+    <div class="page-body">
+      <div class="chip">A new chapter</div>
+      <div class="content-text">
+        <p>Entering her twenties, Billie began a visible transformation. Her second album <strong><em>Happier Than Ever</em></strong> (July 2021) marked a turning point — more mature, more vulnerable, more confident. She traded the dark hair for <strong>platinum blonde</strong> and her music shifted toward self-discovery and emotional resilience.</p>
+        <p>At the <strong>2021 Met Gala</strong>, she appeared in a blush-pink Oscar de la Renta ballgown and said simply: "I'm gonna be a woman. I want to show my body." For someone who had hidden herself for years, it was a profound statement.</p>
+        <div class="quote"><p>"Going through my teenage years of hating myself... a lot of it came from my anger toward my body. Now I'm in love with my future."</p></div>
+        <p>She became increasingly open about her <strong>identity</strong>, speaking publicly in 2023 about being attracted to women. Her 2023 Oscar-winning song <strong><em>"What Was I Made For?"</em></strong> for the Barbie film became an anthem of self-questioning — resonating with millions.</p>
+        <p>In May 2024, she released <strong><em>Hit Me Hard and Soft</em></strong> — her most fearless work yet, with no pre-announced singles. The album's centrepiece, <em>Birds of a Feather</em>, became a global phenomenon. No longer at war with herself, Billie in her twenties is someone still evolving — but finally at peace.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 4 — SPLIT ══ -->
+  <div id="page-4" class="page inner-page split-page">
+    <nav class="top-nav" id="nav-4"></nav>
+    <div class="split-layout">
+      <!-- LEFT: text -->
+      <div class="split-left">
+        <div class="page-hero">
+          <div class="page-num-badge">Section 04</div>
+          <h2 class="page-title">Achievements &amp;<br/><em>Success</em></h2>
+        </div>
+        <div class="page-body">
+          <div class="chip">Awards &amp; legacy</div>
+          <div class="content-text">
+            <p>At the <strong>2020 Grammy Awards</strong>, aged just 18, Billie became the youngest artist ever to win all four major categories in a single night — <em>Album, Record, Song of the Year</em> and <em>Best New Artist</em>. She and Finneas swept the room with 5 awards each.</p>
+            <p>Across her career she has won <strong>10 Grammy Awards</strong> from 34 nominations. In February 2026, she won Song of the Year for <em>Wildflower</em> — making her and Finneas <strong>record holders for winning that category three times</strong>, a feat no artist had ever achieved.</p>
+            <p>In film, she became the <strong>youngest two-time Oscar winner ever</strong> — first in 2022 for <em>No Time to Die</em> (James Bond), then in 2024 for <em>What Was I Made For?</em> (Barbie). She also holds <strong>2 Golden Globes</strong>, <strong>3 Brit Awards</strong>, <strong>9 AMAs</strong>, <strong>8 MTV VMAs</strong>, and over <strong>22 Guinness World Records</strong>.</p>
+            <p>Her four albums — <em>When We All Fall Asleep</em> (2019), <em>Happier Than Ever</em> (2021), <em>Hit Me Hard and Soft</em> (2024) — were all critically acclaimed and chart-topping, streamed billions of times worldwide.</p>
+            <p>Beyond music, Billie uses her platform for <strong>environmental activism</strong>, mental health awareness, and social justice.</p>
+          </div>
+        </div>
+      </div>
+      <!-- RIGHT: photo -->
+      <div class="split-right">
+        <img src="image5.jpg" alt="Billie Eilish achievements" onerror="this.style.display='none'"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 5 ══ -->
+  <div id="page-5" class="page inner-page" style="background-image:url('image6.jpg')">
+    <nav class="top-nav" id="nav-5"></nav>
+    <div class="page-hero">
+      <div class="page-num-badge">Section 05</div>
+      <h2 class="page-title"><em>Conclusion</em></h2>
+    </div>
+    <div class="page-body">
+      <div class="chip">Final thoughts</div>
+      <div class="content-text">
+        <p>Billie Eilish's story is one of <strong>survival, honesty, and growth</strong>. From a two-bedroom house in Highland Park to the biggest stages on earth, she has never pretended to be something she isn't. Every award has been earned by someone who almost didn't make it through her own teenage years.</p>
+        <p>What makes Billie unique is not the Grammys or the Oscars. It is the way she has always allowed herself to be <strong>fully human in public</strong> — scared, proud, confused, joyful, evolving. She wore baggy clothes when she hated her body. She wore a ballgown when she was ready. She wrote about depression when she was living it, and about self-love when she began to find it.</p>
+        <p>She and Finneas built something rare: a creative partnership rooted in family and trust, making music in a childhood bedroom that went on to win the most prestigious awards in the world. No outside writers, no manufactured image — just two siblings and their shared obsession with sound and feeling.</p>
+        <div class="quote"><p>"I had patience with myself. I didn't take that last step. I waited. Things fade."</p></div>
+        <p>At just 23 years old, Billie Eilish has already lived several lifetimes in the public eye. And yet she is still becoming. Whatever comes next — <strong>the world will stop for Billie Eilish</strong>.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const SECTIONS = [
+    null,
+    { num:'01', name:'Childhood & Early Life' },
+    { num:'02', name:'Teenage Years & Rise to Fame' },
+    { num:'03', name:'Life After Adolescence' },
+    { num:'04', name:'Achievements & Success' },
+    { num:'05', name:'Conclusion' },
+  ];
+
+  for (let i = 1; i <= 5; i++) {
+    const nav = document.getElementById('nav-' + i);
+    const pageEl = document.getElementById('page-' + i);
+    const accent = getComputedStyle(pageEl).getPropertyValue('--accent').trim();
+
+    const logo = document.createElement('div');
+    logo.className = 'nav-logo';
+    logo.textContent = 'BILLIE EILISH';
+    logo.style.color = accent;
+    logo.onclick = () => goTo(0);
+    nav.appendChild(logo);
+
+    const divider = document.createElement('div');
+    divider.className = 'nav-divider';
+    nav.appendChild(divider);
+
+    const links = document.createElement('div');
+    links.className = 'nav-links';
+
+    for (let j = 1; j <= 5; j++) {
+      const a = document.createElement('div');
+      a.className = 'nav-link' + (j === i ? ' current' : '');
+      a.innerHTML = `<span class="nl-num">${SECTIONS[j].num}</span><span class="nl-name">${SECTIONS[j].name}</span>`;
+      if (j !== i) a.onclick = () => goTo(j);
+      links.appendChild(a);
+    }
+
+    nav.appendChild(links);
+  }
+
+  let current = 0;
+
+  function goTo(n) {
+    if (n === current) return;
+    document.getElementById('page-' + current).classList.remove('active');
+    document.getElementById('page-' + n).classList.add('active');
+    current = n;
+  }
+</script>
+</body>
+</html>
